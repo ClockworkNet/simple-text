@@ -8,6 +8,7 @@
 namespace craft\simpletext;
 
 use craft\events\RegisterComponentTypesEvent;
+use craft\events\RegisterUserPermissionsEvent;
 use craft\services\Fields;
 use craft\services\UserPermissions;
 use craft\simpletext\models\Settings;
@@ -19,7 +20,7 @@ use yii\base\Event;
 class Plugin extends \craft\base\Plugin
 {
 
-    const EDIT_BLOCK_PERMISSIONS = 'editCodeBlocks';
+    const EDIT_BLOCK_PERMISSION = 'editCodeBlocks';
     /**
      * @inheritdoc
      */
@@ -29,13 +30,17 @@ class Plugin extends \craft\base\Plugin
 
         // Register our field type.
         Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function(RegisterComponentTypesEvent $event) {
-            $event->types[] = Field::class;
+            if (getenv('ALLOW_INSECURE_SIMPLE_TEXT')) {
+                $event->types[] = Field::class;
+            }
+
+            $event->types[] = SecureField::class;
         });
 
         // Register field permission.
-        Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS,  function(RegisterComponentTypesEvent $event) {
+        Event::on(UserPermissions::class, UserPermissions::EVENT_REGISTER_PERMISSIONS,  function(RegisterUserPermissionsEvent $event) {
                 $event->permissions[\Craft::t('simple-text', 'Code Blocks')] = [
-                self::EDIT_BLOCK_PERMISSIONS => ['label' => \Craft::t('simple-text', 'Edit Code Blocks')],
+                self::EDIT_BLOCK_PERMISSION => ['label' => \Craft::t('simple-text', 'Edit Code Blocks')],
             ];
         });
     }

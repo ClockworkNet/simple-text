@@ -11,10 +11,11 @@ use Craft;
 use craft\base\ElementInterface;
 use yii\db\Schema;
 
+
 /**
  * Simple Text field type
  */
-class Field extends \craft\base\Field
+class SecureField extends \craft\base\Field
 {
     /**
      * @var int
@@ -26,7 +27,7 @@ class Field extends \craft\base\Field
      */
     public static function displayName(): string
     {
-        return Craft::t('simple-text', 'Simple Text');
+        return Craft::t('simple-text', 'Secure Simple Text');
     }
 
     /**
@@ -67,6 +68,20 @@ class Field extends \craft\base\Field
     {
         $id = Craft::$app->getView()->formatInputId($this->handle);
         $namespacedId = Craft::$app->getView()->namespaceInputId($id);
+
+
+        $userCanEdit = Craft::$app->getUser()->checkPermission(Plugin::EDIT_BLOCK_PERMISSION);
+
+        if (!$userCanEdit) {
+            return Craft::$app->view->renderTemplate(
+                'simple-text/readonly', [
+                    'name'  => $this->handle,
+                    'value' => $value
+                ]
+            );
+        }
+
+
 
         Craft::$app->getView()->registerAssetBundle(BehaveAsset::class);
         Craft::$app->getView()->registerJs("new Behave({ textarea: document.getElementById('{$namespacedId}') });");
