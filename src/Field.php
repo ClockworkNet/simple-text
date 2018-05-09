@@ -68,6 +68,14 @@ class Field extends \craft\base\Field
         $id = Craft::$app->getView()->formatInputId($this->handle);
         $namespacedId = Craft::$app->getView()->namespaceInputId($id);
 
+        ///todo get user groups and check permissions.
+        return Craft::$app->view->renderTemplate(
+            'readonly', [
+                'name'  => $this->handle,
+                'value' => $value
+            ]
+        );
+
         Craft::$app->getView()->registerAssetBundle(BehaveAsset::class);
         Craft::$app->getView()->registerJs("new Behave({ textarea: document.getElementById('{$namespacedId}') });");
 
